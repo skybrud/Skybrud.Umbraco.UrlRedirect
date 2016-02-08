@@ -1,0 +1,27 @@
+﻿@using Skybrud.LinkPicker
+@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = null;
+
+    LinkPickerItem redirect = Model.Content.GetPropertyValue<LinkPickerList>("redirectUrl").Items.FirstOrDefault();
+
+    if (redirect == null && String.IsNullOrWhiteSpace(redirect.Url))
+    {
+        return;
+    }
+
+    string url = redirect.Url;
+
+    // Since the name (and thereby URL) of a node may change, we should lookup the node at runtime
+    if (redirect.Mode == LinkPickerMode.Content && redirect.Id != null)
+    {
+        IPublishedContent content = UmbracoContext.ContentCache.GetById(redirect.Id);
+
+        if (content != null)
+        {
+            url = content.UrlWithDomain();
+        }
+    }
+
+    HttpContext.Current.Response.RedirectPermanent(url);
+}
